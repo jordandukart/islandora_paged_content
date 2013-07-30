@@ -80,3 +80,24 @@ function islandora_paged_content_permission() {
     ),
   );
 }
+
+function islandora_paged_content_islandora_xacml_editor_child_query($object) {
+  if (array_intersect(array('islandora:bookCModel', 'islandora:newspaperIssueCModel'), $object->models)) {
+    $query = <<<EOQ
+  PREFIX islandora-rels-ext: <http://islandora.ca/ontology/relsext#>
+  SELECT ?object
+  FROM <#ri>
+  WHERE {
+    ?object <fedora-rels-ext:isMemberOf> <info:fedora/{$object->id}> ;
+         islandora-rels-ext:isSequenceNumber ?page .
+  }
+EOQ;
+    return array(
+      'pages' => array(
+        'type' => 'sparql',
+        'query' => $query,
+        'description' => t('All pages of the current paged content object.'),
+      ),
+    );
+  }
+}
